@@ -27,7 +27,7 @@ jobs:
           ssh-keyscan -v -H 206.189.141.124 >> ~/.ssh/known_hosts
           ssh -v -i ~/.ssh/id_rsa root@206.189.141.124 'echo SSH connection successful'
           ls -la ${{ github.workspace }}
-          rsync -avz --delete ${{ github.workspace }}/.next ${{ github.workspace }}/package.json ${{ github.workspace }}/package-lock.json ${{ github.workspace }}/next.config.js root@206.189.141.124:/root/next-CICD/
+          rsync -avz --delete ${{ github.workspace }}/.next ${{ github.workspace }}/package.json ${{ github.workspace }}/package-lock.json ${{ github.workspace }}/next.config.mjs root@206.189.141.124:/root/next-CICD/
           ssh root@206.189.141.124 '
             cd /root/next-CICD &&
             npm ci --only=production &&
