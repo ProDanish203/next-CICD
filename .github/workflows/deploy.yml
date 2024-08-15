@@ -16,6 +16,9 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+      - name: Debug SSH
+        run: |
+          ssh -v -i ~/.ssh/id_rsa root@206.189.141.124 'echo SSH connection successful'
       - name: Deploy to Production
         if: github.ref == 'refs/heads/main'
         env:
@@ -24,7 +27,8 @@ jobs:
           mkdir -p ~/.ssh/
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H 206.189.141.124 >> ~/.ssh/known_hosts
+          ssh-keyscan -v -H 206.189.141.124 >> ~/.ssh/known_hosts
+          ssh -v -i ~/.ssh/id_rsa root@206.189.141.124 'echo SSH connection successful'
           rsync -avz --delete .next package.json package-lock.json next.config.js root@206.189.141.124:/root/next-CICD/
           ssh root@206.189.141.124 '
             cd /root/next-CICD &&
