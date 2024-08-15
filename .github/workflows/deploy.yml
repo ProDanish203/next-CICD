@@ -21,34 +21,22 @@ jobs:
       - name: Build
         run: npm run build
 
-      # - name: Deploy to Production
-      #   if: github.ref == 'refs/heads/main'
-      #   env:
-      #     SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      #   run: |
-      #     mkdir -p ~/.ssh/
-      #     echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-      #     chmod 600 ~/.ssh/id_rsa
-      #     ssh-keyscan -H 206.189.141.124 >> ~/.ssh/known_hosts
-      #     ssh -i ~/.ssh/id_rsa root@206.189.141.124 'echo SSH connection successful'
-      #     rsync -avz --delete ${{ github.workspace }}/.next ${{ github.workspace }}/package.json ${{ github.workspace }}/package-lock.json ${{ github.workspace }}/next.config.mjs root@206.189.141.124:/root/next-CICD/
-      #     ssh root@206.189.141.124 '
-      #       export NVM_DIR="$HOME/.nvm" &&
-      #       [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" &&
-      #       cd /root/next-CICD &&
-      #       npm ci --only=production &&
-      #       pm2 restart site
-      #     '
-
-      - name: Deploy NodeJS App to DigitalOcean
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          username: root
-          script: |
-            mkdir -p /root/next-CICD
-            rsync -avz --delete ${{ github.workspace }}/.next ${{ github.workspace }}/package.json ${{ github.workspace }}/package-lock.json ${{ github.workspace }}/next.config.mjs root@${{ secrets.SSH_HOST }}:/root/next-CICD/
-            cd /root/next-CICD
-            npm ci --only=production
+      - name: Deploy to Production
+        if: github.ref == 'refs/heads/main'
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          ssh -i ~/.ssh/id_rsa root@${{ secrets.SSH_HOST }} 'echo SSH connection successful'
+          rsync -avz --delete ${{ github.workspace }}/.next ${{ github.workspace }}/package.json ${{ github.workspace }}/package-lock.json ${{ github.workspace }}/next.config.mjs root@${{ secrets.SSH_HOST }}:/root/next-CICD/
+          ssh root@${{ secrets.SSH_HOST }} '
+            export NVM_DIR="$HOME/.nvm" &&
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" &&
+            cd /root/next-CICD &&
+            npm ci --only=production &&
             pm2 restart site
+          '
