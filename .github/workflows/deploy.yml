@@ -21,13 +21,13 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          mkdir -p ~/.ssh
+          mkdir -p ~/.ssh/
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-          ssh -v -o StrictHostKeyChecking=no root@206.189.141.124 'echo SSH connection successful'
-          rsync -avz -e "ssh -o StrictHostKeyChecking=no" --delete .next package.json package-lock.json next.config.js root@206.189.141.124:/root/next-CICD/
-          ssh -o StrictHostKeyChecking=no root@206.189.141.124 '
+          ssh-keyscan -v -H 206.189.141.124 >> ~/.ssh/known_hosts
+          ssh -v -i ~/.ssh/id_rsa root@206.189.141.124 'echo SSH connection successful'
+          rsync -avz --delete .next package.json package-lock.json next.config.js root@206.189.141.124:/root/next-CICD/
+          ssh root@206.189.141.124 '
             cd /root/next-CICD &&
             npm ci --only=production &&
             pm2 restart site
