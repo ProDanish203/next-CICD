@@ -16,6 +16,10 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+      - name: Create known_hosts file
+        run: |
+          mkdir -p ~/.ssh
+          touch ~/.ssh/known_hosts
       - name: Debug SSH
         run: |
           ssh -v -i ~/.ssh/id_rsa root@206.189.141.124 'echo SSH connection successful'
@@ -23,12 +27,14 @@ jobs:
         if: github.ref == 'refs/heads/main'
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_PASSPHRASE: ${{ secrets.SSH_PASSPHRASE }}
         run: |
-          mkdir -p ~/.ssh/
+          mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -v -H 206.189.141.124 >> ~/.ssh/known_hosts
-          ssh -v -i ~/.ssh/id_rsa root@206.189.141.124 'echo SSH connection successful'
+          ssh-keyscan -H 206.189.141.124 >> ~/.ssh/known_hosts
+          eval $(ssh-agent -s)
+          echo "$SSH_PASSPHRASE" | ssh-add ~/.ssh/id_rsa
           rsync -avz --delete .next package.json package-lock.json next.config.js root@206.189.141.124:/root/next-CICD/
           ssh root@206.189.141.124 '
             cd /root/next-CICD &&
