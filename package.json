@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint app --ext ts, tsx,js,jsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslintapp --exxt ts, tsx, js, jsx --fix",
-    "format":"prettier --write 'app/**/*.{ts,tsx,js,jsx,css,html}'"
+    "format": "prettier --write 'app/**/*.{ts,tsx,js,jsx,css,html}'",
+    "prepare": "husky"
   },
   "dependencies": {
     "next": "14.2.5",
@@ -29,5 +30,17 @@
     "prettier": "^3.3.3",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "npm run lint && npm run format"
+    },
+    "lint-staged": {
+      "app/**/*.{ts,tsx,js,jsx,css,html}": [
+        "npm run lint",
+        "npm run format"
+      ]
+    }
   }
 }
