@@ -27,17 +27,14 @@ jobs:
         if: github.ref == 'refs/heads/main'
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_PASSPHRASE: ${{ secrets.SSH_PASSPHRASE }}
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          echo "StrictHostKeyChecking no" >> ~/.ssh/config
-          eval $(ssh-agent -s)
-          echo "$SSH_PASSPHRASE" | ssh-add ~/.ssh/id_rsa
+          ssh-keyscan -H 206.189.141.124 >> ~/.ssh/known_hosts
           ssh -v -o StrictHostKeyChecking=no root@206.189.141.124 'echo SSH connection successful'
-          rsync -avz -e "ssh -o StrictHostKeyChecking=no" --delete .next package.json package-lock.json next.config.js root@206.189.141.124:/root/next-CICD/
-          ssh -o StrictHostKeyChecking=no root@206.189.141.124 '
+          rsync -avz --delete .next package.json package-lock.json next.config.js root@206.189.141.124:/root/next-CICD/
+          ssh root@206.189.141.124 '
             cd /root/next-CICD &&
             npm ci --only=production &&
             pm2 restart site
