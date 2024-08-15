@@ -25,9 +25,9 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H 206.189.141.124 >> ~/.ssh/known_hosts
-          scp -r .next package.json package-lock.json next.config.js root@206.189.141.124:/path/to/your/app
+          rsync -avz --delete .next package.json package-lock.json next.config.js root@206.189.141.124:/root/next-CICD/
           ssh root@206.189.141.124 '
-            cd /path/to/your/app &&
+            cd /root/next-CICD &&
             npm ci --only=production &&
-            pm2 restart your-app-name
+            pm2 restart site
           '
